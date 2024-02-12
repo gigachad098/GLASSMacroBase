@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><unit xmlns="http://www.srcML.org/srcML/src" filename="ExampleJavaProgram.java" language="Java" revision="1.0.0"><class><specifier>public</specifier> class <name>ExampleJavaProgram</name> <block>{
+    <function>&amp;lt;p&amp;gt;public void tim() {
+        System.out.println();
+    }&amp;lt;/p&amp;gt;</function>
+    <function>&amp;lt;p&amp;gt;public void nottim() {
+        System.out.println();
+    }&amp;lt;/p&amp;gt;</function>
+}</block></class>
+</unit>
