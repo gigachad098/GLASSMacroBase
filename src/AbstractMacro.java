@@ -1,47 +1,51 @@
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import com.ximpleware.*;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 
 
 public class AbstractMacro {
     XPath query = XPathFactory.newInstance().newXPath();
-    Document file;
-    NodeList nodes;
+    VTDGen vg = new VTDGen();
+    AutoPilot ap = new AutoPilot();
+    XMLModifier mod = new XMLModifier();
+    VTDNav vn;
     String findExpression;
     String sourcePath;
+    int foundNode = -1;
 
     public AbstractMacro(String findExpression, String sourcePath) {
         this.findExpression = findExpression;
         this.sourcePath = sourcePath;
     }
 
-    private void loadSourceFile() {
+    public void loadSourceFile() {
         try {
-            InputSource temp = new InputSource(this.sourcePath);
-            file = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(temp);
-        } catch (IOException | ParserConfigurationException | SAXException e) {
+            vg.parseFile(sourcePath, false);
+            this.vn = vg.getNav();
+            ap.bind(vn);
+            mod.bind(vn);
+        } catch (ModifyException e) {
             Utils.logString(e.toString());
         }
     }
 
-    private void query() {
+    public void query() {
         try {
-            nodes = (NodeList) query.evaluate(this.findExpression, file, XPathConstants.NODESET);
-        } catch (XPathExpressionException e) {
+            ap.selectXPath(this.findExpression);
+            ap.evalXPath();
+            this.foundNode = vn.getText();
+        } catch (XPathParseException e) {
             Utils.logString(e.toString());
+        } catch (XPathEvalException | NavException e) {
+            throw new RuntimeException(e);
         }
     }
-    public void executeMacro() {
-        this.loadSourceFile();
-        this.query();
+    public void rebuildXML() throws ModifyException, IOException, TranscodeException {
+        try {
+            mod.output("new.xml");
+        } catch (ModifyException | IOException | TranscodeException e) {
+            Utils.logString(e.toString());
+        }
     }
 }
